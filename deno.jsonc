@@ -1,0 +1,15 @@
+{
+  "name": "@gray-adeyi/korapay-sdk",
+  "version": "0.1.0",
+  "exports": "./mod.ts",
+  "tasks": {
+    "dev": "deno test --watch mod.ts"
+  },
+  "license": "MIT",
+  "imports": {
+    "@std/crypto": "jsr:@std/crypto@^1.0.3",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.1",
+    "axios": "npm:axios@^1.7.5",
+    "lodash-es": "npm:lodash-es@^4.17.21"
+  }
+}
