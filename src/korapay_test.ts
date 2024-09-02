@@ -1,14 +1,23 @@
-// import KoraPayClient from "./korapay.ts";
-// // import '@std/dotenv'
-// import { load } from "@std/dotenv";
+import { beforeAll, describe, it } from "@std/testing/bdd";
+import KorapayClient from "./korapay.ts";
+import { Country } from "./enums.ts";
+import { load} from '@std/dotenv'
 
-// const config = await load({
-//   envPath: "./.env",
-//   export: true,
-// });
 
-// console.log(config);
 
-// const client = new KoraPayClient();
-// const response = await client.getBalances();
-// console.log(response.data);
+
+describe('KorapayClient', () => {
+    let client: KorapayClient
+
+    beforeAll(async () =>{
+        await load({envPath: './.env',export: true})
+        client = new KorapayClient()
+    })
+
+    it('chargeViaCard', () => {})
+
+    it('getBanks',async () => {
+        const response = await client.getBanks(Country.NIGERIA)
+        console.log(response)
+    })
+})
