@@ -1,12 +1,20 @@
-export class KoraPayClientError extends Error {
-  detail: any;
+export class KorapayClientError extends Error {
+  detail: string;
   status?: number;
   code?: string;
+  wrappedError?: Error;
 
-  constructor(detail: any, status?: number, code?: string) {
-    super(`${JSON.stringify(detail)}`);
+
+  constructor(
+    detail: string,
+    status?: number,
+    code?: string,
+    wrappedError?: Error,
+  ) {
+    super(detail);
     this.detail = detail;
     this.status = status;
     this.code = code;
+    this.wrappedError = wrappedError;
   }
 }
