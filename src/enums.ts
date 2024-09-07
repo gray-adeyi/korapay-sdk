@@ -24,11 +24,10 @@ export enum MobileMoneyOperator {
   MTN_GHANA = "mtn-gh",
 }
 
-
 export enum HTTPMethod {
   GET,
   POST,
   PATCH,
   PUT,
-  DELETE
+  DELETE,
 }

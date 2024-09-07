@@ -1,4 +1,8 @@
-import type { Currency, MobileMoneyOperator, PaymentChannel } from "../enums.ts";
+import type {
+  Currency,
+  MobileMoneyOperator,
+  PaymentChannel,
+} from "../enums.ts";
 
 type Authorization = {
   readonly pin?: string;
@@ -36,14 +40,13 @@ export type Card = {
   readonly pin?: string;
 };
 
-
 /**
- * A representation of the data sent to korapay to 
+ * A representation of the data sent to korapay to
  * initiate a charge via card
  */
 export type ChargeViaCardPayload = {
   /**
-   * A unique reference for the payment. 
+   * A unique reference for the payment.
    * The reference must be at least 8 characters long.
    */
   readonly reference: string;
@@ -69,19 +72,19 @@ export type ChargeViaCardPayload = {
    */
   readonly amount: number;
   /**
-   * An enum representing the currency for the 
+   * An enum representing the currency for the
    * charge. E.g., `Currency.NGN`
    */
   readonly currency: Currency;
   /**
-   * A URL to which we can redirect your customer 
+   * A URL to which we can redirect your customer
    * after their payment is complete.
    */
   readonly redirectUrl?: string;
   /**
-   * An object with a maximum of 5 fields/keys for storing additional 
-   * information. Empty dictionaries are not allowed. Each field name 
-   * (i.e., dictionary keys) can have a maximum length of 20 characters. 
+   * An object with a maximum of 5 fields/keys for storing additional
+   * information. Empty dictionaries are not allowed. Each field name
+   * (i.e., dictionary keys) can have a maximum length of 20 characters.
    * Allowed characters: A-Z, a-z, 0-9, and -.
    */
   // deno-lint-ignore no-explicit-any
@@ -99,7 +102,7 @@ export type AuthorizeCardChargePayload = {
  */
 export type ChargeViaBankTransferPayload = {
   /**
-   * A unique reference for the payment. 
+   * A unique reference for the payment.
    * The reference must be at least 8 characters long.
    */
   readonly reference: string;
@@ -121,13 +124,13 @@ export type ChargeViaBankTransferPayload = {
    */
   readonly amount: number;
   /**
-   * An enum representing the currency for the charge. 
+   * An enum representing the currency for the charge.
    * E.g., `Currency.NGN`. Currently, the
    * only supported currency is `Currency.NGN`
    */
   readonly currency: Currency;
   /**
-   * The account name that should be displayed 
+   * The account name that should be displayed
    * when the account number is resolved.
    */
   readonly accountName?: string;
@@ -136,21 +139,21 @@ export type ChargeViaBankTransferPayload = {
    */
   readonly narration?: string;
   /**
-   * A URL to which we can send the webhook 
+   * A URL to which we can send the webhook
    * notification for the transaction.
    */
   readonly notificationUrl?: string;
   /**
-   * This sets who bear the fees of the transaction. If it 
-   * is set to `True`,the merchant will bear the fee. If 
+   * This sets who bear the fees of the transaction. If it
+   * is set to `True`,the merchant will bear the fee. If
    * it is set to `False`, the customer will bear the fee.
    * By default, it is `False`.
    */
   readonly merchantBearsCost?: string;
   /**
-   * An object with a maximum of 5 fields/keys for storing 
-   * additional information. Empty dictionaries are not allowed. 
-   * Each field name (i.e., dictionary keys) can have a maximum 
+   * An object with a maximum of 5 fields/keys for storing
+   * additional information. Empty dictionaries are not allowed.
+   * Each field name (i.e., dictionary keys) can have a maximum
    * length of 20 characters. Allowed characters: A-Z, a-z, 0-9, and -.
    */
   // deno-lint-ignore no-explicit-any
@@ -158,7 +161,7 @@ export type ChargeViaBankTransferPayload = {
 };
 
 /**
- * A representation of the data sent to korapay to create a 
+ * A representation of the data sent to korapay to create a
  * virtual bank account.
  */
 export type CreateVirtualBankAccountPayload = {
@@ -171,8 +174,8 @@ export type CreateVirtualBankAccountPayload = {
    */
   readonly accountReference: string;
   /**
-   * This is the bank code of the bank providing the virtual 
-   * bank account. E.g., `035` is the code for Wema Bank. Use 
+   * This is the bank code of the bank providing the virtual
+   * bank account. E.g., `035` is the code for Wema Bank. Use
    * `000` to create a virtual bank account in the sandbox environment.
    */
   readonly bankCode: string;
@@ -211,7 +214,7 @@ export type CreateVirtualBankAccountPayload = {
  */
 export type ChargeViaMobileMoneyPayload = {
   /**
-   * A unique reference for the payment. 
+   * A unique reference for the payment.
    * The reference must be at least 8 characters long.
    */
   readonly reference: string;
@@ -286,7 +289,7 @@ export type InitiateChargePayload = {
    */
   readonly amount: number;
   /**
-   * An enum representing the currency to charge the 
+   * An enum representing the currency to charge the
    * customer in. E.g., `Currency.GHS`.
    */
   readonly currency: Currency;
@@ -312,13 +315,13 @@ export type InitiateChargePayload = {
     readonly email: string;
   };
   /**
-   * An array of `PaymentChannel` enum representing the payment channels 
-   * you want to support for accepting the payments. E.g., 
+   * An array of `PaymentChannel` enum representing the payment channels
+   * you want to support for accepting the payments. E.g.,
    * `[PaymentChannel.CARD, PaymentChannel.BANK_TRANSFER]`
    */
   readonly channels?: PaymentChannel[];
   /**
-   * A enum representing the preferred payment channel when multiple 
+   * A enum representing the preferred payment channel when multiple
    * payment channels are supported. E.g., `PaymentChannel.MOBILE_MONEY`
    */
   readonly defaultChannel?: PaymentChannel;
@@ -466,7 +469,7 @@ export type BulkPayoutToBankAccountPayload = {
 };
 
 /**
- * A representation of the response returned as a result of 
+ * A representation of the response returned as a result of
  * making a request to korapay
  */
 export type KorapayResponse = {

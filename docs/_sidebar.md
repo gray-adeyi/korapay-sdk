@@ -1,2 +1,2 @@
-* [Home](/)
-* [Getting Started](getting-started.md)
+- [Home](/)
+- [Getting Started](getting-started.md)

@@ -7,7 +7,7 @@ describe("KorapayClient", () => {
   let client: KorapayClient;
 
   beforeAll(async () => {
-    await load({ envPath: "./.env", export: true });
+    await load({ envPath: "../.env", export: true });
     client = new KorapayClient();
   });
 
@@ -15,6 +15,11 @@ describe("KorapayClient", () => {
 
   it("getBanks", async () => {
     const response = await client.getBanks(Country.NIGERIA);
+    console.log(response);
+  });
+
+  it("KorapayClient.getBalances", async () => {
+    const response = await client.getBalances();
     console.log(response);
   });
 });

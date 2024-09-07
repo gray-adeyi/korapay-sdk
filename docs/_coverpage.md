@@ -7,5 +7,4 @@
 - Built with Typescript
 - Supports multiple Javascript runtime (Node, Bun, Deno)
 
-[GitHub](https://github.com/gray-adeyi/korapay-sdk)
-[Get Started](#docsify)
+[GitHub](https://github.com/gray-adeyi/korapay-sdk) [Get Started](#docsify)

@@ -4,7 +4,6 @@ export class KorapayClientError extends Error {
   code?: string;
   wrappedError?: Error;
 
-
   constructor(
     detail: string,
     status?: number,
