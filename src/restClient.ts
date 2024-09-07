@@ -17,37 +17,70 @@ export default class RestClient {
   static ENV_SECRET_KEY_NAME = "KORAPAY_SECRET_KEY";
   static ENV_ENCRYPTION_KEY_NAME = "KORAPAY_ENCRYPTION_KEY";
 
-  private publicKey!: string;
-  private secretKey!: string;
-  private encryptionKey!: string;
-  private client: AxiosInstance;
+  private publicKey: string = "";
+  private secretKey: string = "";
+  private encryptionKey: string = "";
+  private secureClient: AxiosInstance;
+  private openClient: AxiosInstance;
 
   constructor(publicKey?: string, secretKey?: string, encryptionKey?: string) {
-    this.loadPublicKey(publicKey);
-    this.loadPrivateKey(secretKey);
-    this.loadEncryptionKey(encryptionKey);
-    this.client = axios.create({
+    this.loadKey(
+      "public key",
+      RestClient.ENV_PUBLIC_KEY_NAME,
+      publicKey,
+    );
+    this.loadKey(
+      "secret key",
+      RestClient.ENV_SECRET_KEY_NAME,
+      secretKey,
+    );
+    this.loadKey(
+      "encryption key",
+      RestClient.ENV_ENCRYPTION_KEY_NAME,
+      encryptionKey,
+    );
+
+    this.secureClient = axios.create({
       baseURL: RestClient.BASE_URL,
-      headers: this.headers,
+      headers: this.secureHeaders,
     });
-    this.client.interceptors.request.use(
+    this.secureClient.interceptors.request.use(
       this.requestPayloadTransformerInterceptor,
       this.handleRequestError,
     );
-    this.client.interceptors.response.use(
+    this.secureClient.interceptors.response.use(
+      this.responsePayloadTransformerInterceptor,
+      this.handleResponseError,
+    );
+
+    this.openClient = axios.create({
+      baseURL: RestClient.BASE_URL,
+      headers: this.openHeaders,
+    });
+    this.openClient.interceptors.request.use(
+      this.requestPayloadTransformerInterceptor,
+      this.handleRequestError,
+    );
+    this.openClient.interceptors.response.use(
       this.responsePayloadTransformerInterceptor,
       this.handleResponseError,
     );
   }
 
   // deno-lint-ignore no-explicit-any
-  async call(endpoint: string, method: HTTPMethod, data?: any, noAuth = false): Promise<KorapayResponse> {
-    const handler = this.getMethodHandler(method);
+  async call(
+    endpoint: string,
+    method: HTTPMethod,
+    // deno-lint-ignore no-explicit-any
+    data?: any,
+    noAuth = false,
+  ): Promise<KorapayResponse> {
+    const handler = this.getMethodHandler(method, noAuth);
     let response: AxiosResponse;
     if ([HTTPMethod.GET, HTTPMethod.DELETE].includes(method)) {
-      response = noAuth ? await handler(endpoint, {headers: {Authorization: ''}}) : await handler(endpoint);
+      response = await handler(endpoint);
     } else {
-      response =noAuth ? await handler(endpoint,data,{headers:{Authorization:''}}) : await handler(endpoint, data);
+      response = await handler(endpoint, data);
     }
     return this.deserializeResponse(response);
   }
@@ -57,35 +90,48 @@ export default class RestClient {
     return encryptAes256(this.encryptionKey, data);
   }
 
-  private get baseHeaders(){
+  private get baseHeaders() {
     return {
-"User-Agent": "@gray-adeyi/korapay-sdk 0.1.0",
+      "User-Agent": "@gray-adeyi/korapay-sdk 0.1.0",
       Accept: "application/json",
-      'Content-Type': 'application/json',
-      Authorization: ''
-    }
+      "Content-Type": "application/json",
+    };
   }
 
-  private get headers() {
+  private get openHeaders() {
+    return {
+      ...this.baseHeaders,
+      Authorization: `Bearer ${this.publicKey}`,
+    };
+  }
+
+  private get secureHeaders() {
     return {
       ...this.baseHeaders,
       Authorization: `Bearer ${this.secretKey}`,
     };
   }
 
-  private getMethodHandler(method: HTTPMethod) {
-    switch (method) {
-      case HTTPMethod.GET:
-        return this.client.get;
-      case HTTPMethod.POST:
-        return this.client.post;
-      case HTTPMethod.PATCH:
-        return this.client.patch;
-      case HTTPMethod.PUT:
-        return this.client.put;
-      case HTTPMethod.DELETE:
-        return this.client.delete;
-    }
+  private getMethodHandler(method: HTTPMethod, noAuth: boolean) {
+    // deno-lint-ignore no-explicit-any
+    const secureClientHandlerMapping: Record<HTTPMethod, any> = {
+      [HTTPMethod.GET]: this.secureClient.get,
+      [HTTPMethod.POST]: this.secureClient.post,
+      [HTTPMethod.PATCH]: this.secureClient.patch,
+      [HTTPMethod.PUT]: this.secureClient.put,
+      [HTTPMethod.DELETE]: this.secureClient.delete,
+    };
+    const openClientHandlerMapping = {
+      [HTTPMethod.GET]: this.openClient.get,
+      [HTTPMethod.POST]: this.openClient.post,
+      [HTTPMethod.PATCH]: this.openClient.patch,
+      [HTTPMethod.PUT]: this.openClient.put,
+      [HTTPMethod.DELETE]: this.openClient.delete,
+    };
+    const mapping = noAuth
+      ? openClientHandlerMapping
+      : secureClientHandlerMapping;
+    return mapping[method];
   }
 
   private deserializeResponse(response: AxiosResponse): KorapayResponse {
@@ -101,7 +147,6 @@ export default class RestClient {
     config: InternalAxiosRequestConfig,
   ) {
     config.data = RestClient.camelToSnakeCaseTransformer(config.data);
-    console.log(config)
     return config;
   }
 
@@ -113,12 +158,12 @@ export default class RestClient {
   // deno-lint-ignore no-explicit-any
   static camelToSnakeCaseTransformer(data: any): any {
     if (Array.isArray(data)) {
-      return data.map(this.camelToSnakeCaseTransformer);
+      return data.map(RestClient.camelToSnakeCaseTransformer);
     } else if (data !== null && typeof data === "object") {
       // deno-lint-ignore no-explicit-any
       return Object.keys(data).reduce((acc: Record<string, any>, key) => {
         const snakeKey: string = snakeCase(key);
-        acc[snakeKey] = this.camelToSnakeCaseTransformer(data[key]);
+        acc[snakeKey] = RestClient.camelToSnakeCaseTransformer(data[key]);
         return acc;
       }, {});
     }
@@ -128,12 +173,12 @@ export default class RestClient {
   // deno-lint-ignore no-explicit-any
   static snakeToCamelCaseTransformer(data: any): any {
     if (Array.isArray(data)) {
-      return data.map(this.snakeToCamelCaseTransformer);
+      return data.map(RestClient.snakeToCamelCaseTransformer);
     } else if (data !== null && typeof data === "object") {
       // deno-lint-ignore no-explicit-any
       return Object.keys(data).reduce((acc: Record<string, any>, key) => {
         const camelKey = camelCase(key);
-        acc[camelKey] = this.snakeToCamelCaseTransformer(data[key]);
+        acc[camelKey] = RestClient.snakeToCamelCaseTransformer(data[key]);
         return acc;
       }, {});
     }
@@ -152,44 +197,41 @@ export default class RestClient {
     );
   }
 
-  private loadPublicKey(value?: string) {
+  private loadKey(
+    keyName: "public key" | "secret key" | "encryption key",
+    keyEnvName: string,
+    value?: string,
+  ) {
     if (value) {
-      this.publicKey = value;
+      switch (keyName) {
+        case "public key":
+          this.publicKey = value;
+          break;
+        case "secret key":
+          this.secretKey = value;
+          break;
+        case "encryption key":
+          this.encryptionKey = value;
+          break;
+      }
       return;
     }
-    if (!Deno.env.has(RestClient.ENV_PUBLIC_KEY_NAME)) {
+    if (!Deno.env.has(keyEnvName)) {
       throw new KorapayClientError(
-        `public key was not provided on instantiation or set in environmental variables as ${RestClient.ENV_PUBLIC_KEY_NAME}`,
+        `${keyName} was not provided on instantiation or set in environmental variables as ${keyEnvName}`,
       );
     }
-    this.publicKey = Deno.env.get(RestClient.ENV_PUBLIC_KEY_NAME) as string;
-  }
-
-  private loadPrivateKey(value?: string) {
-    if (value) {
-      this.secretKey = value;
-      return;
+    const envValue = Deno.env.get(keyEnvName) as string;
+    switch (keyName) {
+      case "public key":
+        this.publicKey = envValue;
+        break;
+      case "secret key":
+        this.secretKey = envValue;
+        break;
+      case "encryption key":
+        this.encryptionKey = envValue;
+        break;
     }
-    if (!Deno.env.has(RestClient.ENV_SECRET_KEY_NAME)) {
-      throw new KorapayClientError(
-        `secret key was not provided on instantiation or set in environmental variables as ${RestClient.ENV_SECRET_KEY_NAME}`,
-      );
-    }
-    this.secretKey = Deno.env.get(RestClient.ENV_SECRET_KEY_NAME) as string;
-  }
-
-  private loadEncryptionKey(value?: string) {
-    if (value) {
-      this.encryptionKey = value;
-      return;
-    }
-    if (!Deno.env.has(RestClient.ENV_ENCRYPTION_KEY_NAME)) {
-      throw new KorapayClientError(
-        `encryption key was not provided on instantiation or set in environmental variables as ${RestClient.ENV_ENCRYPTION_KEY_NAME}`,
-      );
-    }
-    this.encryptionKey = Deno.env.get(
-      RestClient.ENV_ENCRYPTION_KEY_NAME,
-    ) as string;
   }
 }
