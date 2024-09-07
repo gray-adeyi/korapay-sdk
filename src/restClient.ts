@@ -41,7 +41,7 @@ export default class RestClient {
   }
 
   // deno-lint-ignore no-explicit-any
-  async call(endpoint: string, method: HTTPMethod, data?: any, noAuth = false) {
+  async call(endpoint: string, method: HTTPMethod, data?: any, noAuth = false): Promise<KorapayResponse> {
     const handler = this.getMethodHandler(method);
     let response: AxiosResponse;
     if ([HTTPMethod.GET, HTTPMethod.DELETE].includes(method)) {
@@ -53,7 +53,7 @@ export default class RestClient {
   }
 
   // deno-lint-ignore no-explicit-any
-  encryptData(data: any) {
+  encryptData(data: any): Promise<string> {
     return encryptAes256(this.encryptionKey, data);
   }
 
