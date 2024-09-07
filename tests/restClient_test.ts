@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
-import RestClient from "./restClient.ts";
+import RestClient from "../src/restClient.ts";
 
 describe("RestClient", () => {
   describe("publicKey", () => {});
