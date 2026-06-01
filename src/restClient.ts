@@ -73,7 +73,7 @@ export default class RestClient {
     // deno-lint-ignore no-explicit-any
     data?: any,
     noAuth = false,
-  // deno-lint-ignore no-explicit-any
+    // deno-lint-ignore no-explicit-any
   ): Promise<KorapayResponse<any>> {
     const handler = this.getMethodHandler(method, noAuth);
     let response: AxiosResponse;

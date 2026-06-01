@@ -323,7 +323,7 @@ export type GetPayoutsData = {
   payouts: UnifiedPayout[];
 };
 
-export type Balance = Record<'ghs' | 'kes'  | 'ngn' | 'usd', {
+export type Balance = Record<"ghs" | "kes" | "ngn" | "usd", {
   readonly pendingBalance: number;
   readonly availableBalance: number;
 }>;
